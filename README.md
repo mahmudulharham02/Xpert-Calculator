@@ -1,4 +1,4 @@
-# Xpert Calculator — README.md
+# Xpert Calculator Scientific Calculator
 
 ````md
 # 🧮 Xpert Calculator
