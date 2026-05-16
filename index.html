@@ -8,6 +8,11 @@
   <meta name="theme-color" content="#FFB300">
   <title>Xpert Calculator</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" onload="window.katexLoaded=true; if(window.updateUI) window.updateUI();" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/nerdamer.core.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Algebra.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Calculus.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.13/Solve.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
     
@@ -25,42 +30,42 @@
       width: 100vw; height: 100dvh; max-width: 430px; 
       background: #0D0D0D; display: flex; flex-direction: column;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #333;
-      position: relative; overflow: hidden; padding: clamp(2px, 1vh, 8px) 8px;
+      position: relative; overflow: hidden; padding: clamp(2px, 0.5vh, 4px) 4px;
     }
 
-    /* Display Section - max 30dvh */
+    /* Display Section - compact */
     #display-section {
-      height: 24dvh;
-      max-height: 200px;
-      min-height: 100px;
+      height: 21dvh;
+      max-height: 180px;
+      min-height: 90px;
       display: flex; flex-direction: column;
       flex-shrink: 0;
     }
 
     .header {
       display: flex; justify-content: space-between; align-items: center; 
-      padding: 2px 2px 4px 2px; 
+      padding: 0 2px 2px 2px;
     }
     .header-text { display: flex; flex-direction: column; }
-    .header .title { color: #FFB300; font-weight: bold; font-size: clamp(12px, 3vw, 16px); letter-spacing: 0.1em; text-transform: uppercase; line-height: 1; }
-    .header .subtitle { color: #FFB300; font-weight: 300; font-size: clamp(8px, 2vw, 10px); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
-    .header .chip { color: #FFB300; font-size: clamp(10px, 2.5vw, 12px); opacity: 0.8; }
+    .header .title { color: #FFB300; font-weight: bold; font-size: clamp(10px, 2.5vw, 14px); letter-spacing: 0.1em; text-transform: uppercase; line-height: 1; }
+    .header .subtitle { color: #FFB300; font-weight: 300; font-size: clamp(7px, 1.8vw, 9px); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 1px; }
+    .header .chip { color: #FFB300; font-size: clamp(9px, 2.2vw, 11px); opacity: 0.8; }
 
     #display-glass {
       flex: 1;
       background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px), #172018;
-      border: 3px solid #111; border-radius: 8px;
+      border: 2px solid #111; border-radius: 6px;
       display: flex; flex-direction: column; justify-content: space-between;
-      box-shadow: inset 0 3px 18px rgba(0,0,0,0.8), inset 0 1px 3px rgba(255,255,255,0.05);
-      padding: clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 12px);
+      box-shadow: inset 0 3px 12px rgba(0,0,0,0.8), inset 0 1px 3px rgba(255,255,255,0.05);
+      padding: clamp(4px, 0.8vh, 6px) clamp(6px, 1.2vw, 8px);
       position: relative;
       overflow: hidden;
     }
 
     #status-bar {
-      display: flex; gap: max(4px, 1vw); font-family: 'Courier Prime', monospace;
-      font-size: clamp(9px, 2.5vw, 12px); color: #8F9E8F; height: max(12px, 3vh);
-      margin-bottom: 2px; align-items: center; letter-spacing: 0.5px;
+      display: flex; gap: max(2px, 0.5vw); font-family: 'Courier Prime', monospace;
+      font-size: clamp(8px, 2.2vw, 11px); color: #8F9E8F; height: max(10px, 2.5vh);
+      margin-bottom: 1px; align-items: center; letter-spacing: 0.2px;
     }
     #status-bar span { opacity: 0; transition: opacity 0.2s; }
     #status-bar span.st-active { opacity: 1; color: #A8C8A0; }
@@ -69,8 +74,8 @@
     #st-deg, #st-rad, #st-gra { cursor: pointer; pointer-events: auto; }
     #st-frac { color: #A8C8A0; }
     
-    #st-s { color: #FFB300; border: 1px solid #FFB300; padding: 0 2px; border-radius: 2px; opacity: 0.2; }
-    #st-a { color: #B39DDB; border: 1px solid #B39DDB; padding: 0 2px; border-radius: 2px; opacity: 0.2; }
+    #st-s { color: #FFB300; border: 1px solid #FFB300; padding: 0 1px; border-radius: 2px; opacity: 0.2; }
+    #st-a { color: #B39DDB; border: 1px solid #B39DDB; padding: 0 1px; border-radius: 2px; opacity: 0.2; }
     #st-s.st-active { opacity: 1; background: rgba(255,179,0,0.2); }
     #st-a.st-active { opacity: 1; background: rgba(179,157,219,0.2); }
     
@@ -78,17 +83,15 @@
 
     #expression-zone {
       flex: 1;
-      font-family: 'KaTeX_Main', 'Times New Roman', serif;
-      font-size: clamp(24px, 6vw, 36px);
       color: #E2EFE2;
       text-align: left;
       white-space: nowrap;
       overflow-x: auto;
       overflow-y: hidden;
-      display: flex;
-      align-items: center;
-      padding-bottom: 4px;
+      padding-top: 4px;
+      padding-bottom: 2px;
       scrollbar-width: none;
+      font-size: clamp(24px, 6vw, 34px);
     }
     #expression-zone::-webkit-scrollbar { display: none; }
     #expression-zone .cursor { 
@@ -98,40 +101,30 @@
     }
     @keyframes blink { 50% { opacity: 0; } }
 
-    .m-op { margin: 0 0.15em; font-family: 'KaTeX_Main'; }
-    .m-fn { font-family: 'KaTeX_Main'; font-style: normal; margin-right: 0.05em; color: #C5D6C5; }
-    .m-var { font-style: italic; font-family: 'KaTeX_Math', 'KaTeX_Main', italic; }
-
-    .fraction {
-      display: inline-flex; flex-direction: column; align-items: center; 
-      vertical-align: middle; margin: 0 0.1em; font-size: 0.8em;
-      transform: translateY(-0.1em);
-    }
-    .fraction .numerator { border-bottom: 1.5px solid currentColor; padding: 0 0.2em; min-width: 0.8em; text-align: center; }
-    .fraction .denominator { padding: 0 0.2em; min-width: 0.8em; text-align: center; margin-top: 0.1em; }
-
-    .radical {
-      display: inline-flex; align-items: baseline; margin: 0 0.1em;
-    }
-    .radical::before {
-      content: "\221A"; font-family: 'KaTeX_Main'; font-size: 1.25em; margin-right: -0.05em; transform: translateY(0.1em);
-    }
-    .radical .radicand { border-top: 1.5px solid currentColor; padding: 0.1em 0.1em 0; margin-left: 0.05em; }
-    .root-idx { font-size: 0.5em; vertical-align: super; margin-right: -0.6em; position: relative; top: -0.5em; left: -0.2em; }
-
-    sup { font-size: 0.6em; vertical-align: super; margin-left: 0.05em; }
-    sub { font-size: 0.6em; vertical-align: sub; margin-left: 0.05em; }
+    /* Override KaTeX default text color so it inherits the green display */
+    .katex { color: inherit; font-size: 1.1em !important; }
 
     #result-zone {
-      height: clamp(34px, 7vw, 48px); 
-      font-size: clamp(32px, 8vw, 46px); 
+      min-height: clamp(40px, 8vw, 60px); 
       color: #FFFFFF;
       text-align: right; 
-      font-family: 'KaTeX_Main', serif;
       text-shadow: 0 0 12px rgba(255,255,255,0.25); 
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-      line-height: 1;
       font-weight: 500;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-end;
+    }
+    .result-exact {
+      font-size: clamp(24px, 6vw, 34px);
+      margin-bottom: 4px;
+      color: #E2EFE2;
+    }
+    .result-dec {
+      font-size: clamp(20px, 5vw, 28px); 
+      color: #A8C8A0;
+      line-height: 1;
     }
     @keyframes resultFadeIn {
         from { opacity: 0; transform: translateY(8px); }
@@ -141,22 +134,83 @@
         animation: resultFadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 
-    #base-tabs { display: none; width: 100%; justify-content: space-around; background: transparent; padding: 2px 0 6px 0; font-size: clamp(9px, 2.5vw, 12px); font-weight: bold; color: #555; }
+    #base-tabs { display: none; width: 100%; justify-content: space-around; background: transparent; padding: 2px 0 4px 0; font-size: clamp(9px, 2.5vw, 12px); font-weight: bold; color: #555; }
     #base-tabs.active { display: flex; }
     .base-tab { padding: 4px 8px; border-radius: 4px; border: 1px solid #333; cursor: pointer; transition: 0.2s;}
     .base-tab.active { color: #FFB300; border-color: #FFB300; background: rgba(255,179,0,0.1); }
 
-    /* Keypad Section - 70dvh */
+    /* Keypad Section */
     #keypad {
-      display: grid; 
-      grid-template-columns: repeat(5, 1fr);
-      grid-template-rows: repeat(13, 1fr);
-      gap: 3px;
-      padding: clamp(2px, 1vw, 4px) 0 0 0;
-      height: 74dvh;
+      padding: clamp(1px, 0.5vw, 2px) 0 0 0;
+      height: 77dvh;
       flex: 1;
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
     }
+
+    .keypad-zone-top {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 2px;
+      flex: 2;
+    }
+    
+    .keypad-zone-sci {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 2px;
+      flex: 3;
+    }
+    
+    .keypad-zone-num {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 2px;
+      flex: 4.5;
+    }
+
+    .dpad-container {
+      grid-column: 3 / span 2;
+      grid-row: 1 / span 2;
+      background: #111412;
+      border-radius: 50%;
+      position: relative;
+      margin: 2px 4px;
+      box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 2px 6px rgba(0,0,0,0.8);
+      border: 1px solid #2A362A;
+    }
+
+    .dpad-btn {
+      position: absolute;
+      width: 40%;
+      height: 40%;
+      background: transparent;
+      border: none;
+      color: #A8C8A0;
+      font-size: clamp(12px, 3vw, 16px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.8;
+      transition: all 0.1s;
+    }
+    .dpad-btn:active { background: rgba(255,255,255,0.1); border-radius: 50%; }
+    .dpad-up { top: 0; left: 30%; }
+    .dpad-down { bottom: 0; left: 30%; }
+    .dpad-left { top: 30%; left: 0; }
+    .dpad-right { top: 30%; right: 0; }
+    .dpad-center {
+      position: absolute; top: 35%; left: 35%; width: 30%; height: 30%;
+      background: #0D110D; border-radius: 50%;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+    }
+
 
     .key-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; height: 100%; justify-content: flex-end;}
     .key-labels { display: flex; justify-content: space-between; width: 100%; font-size: clamp(7px, 1.8vw, 10px); font-weight: 500; margin-bottom: 2px; font-family: sans-serif; letter-spacing: -0.2px;}
@@ -181,8 +235,8 @@
     .btn[data-p="SHIFT"] { color: #FFB300; }
     .btn[data-p="ALPHA"] { color: #B39DDB; }
     .btn[data-p="ON"] { background: #E53935; border-bottom-width: 2px; border-bottom-color: #000; }
-    .btn[data-p="AC"] { background: #C0392B; border-bottom-color: #000; }
-    .btn[data-p="="] { background: #00C853; border-bottom-color: #009624; color: #000; font-weight: bold; }
+    .btn[data-p="AC"], .btn[data-p="DEL"] { background: #C0392B; border-bottom-color: #000; }
+    .btn[data-p="="] { background: #4DB05E; border-bottom-color: #388445; color: #FFF; font-weight: bold; }
     .key-hex { color: #FFB300 !important; }
     
     .err-shake { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
@@ -279,829 +333,7 @@
   </div>
 </div>
 
-<script>
-// ---------- Core Data & Constants ----------
-const CONSTANTS = [
-  {k:"c", v:299792458, n:"Speed of light"}, {k:"h", v:6.62607015e-34, n:"Planck constant"},
-  {k:"G", v:6.6743e-11, n:"Gravitational cst"}, {k:"e", v:1.602176634e-19, n:"Elem charge"},
-  {k:"me", v:9.1093837e-31, n:"Electron mass"}, {k:"mp", v:1.67262192e-27, n:"Proton mass"},
-  {k:"mn", v:1.6749275e-27, n:"Neutron mass"}, {k:"NA", v:6.02214076e23, n:"Avogadro"},
-  {k:"k", v:1.380649e-23, n:"Boltzmann cst"}, {k:"F", v:96485.3321, n:"Faraday cst"},
-  {k:"R", v:8.3144626, n:"Gas constant"}, {k:"σ", v:5.6703744e-8, n:"Stefan-Boltzmann"},
-  {k:"R∞", v:10973731.568, n:"Rydberg cst"}, {k:"μB", v:9.27401e-24, n:"Bohr magneton"},
-  {k:"μN", v:5.0507837e-27, n:"Nuclear magneton"},{k:"a0", v:5.2917721e-11, n:"Bohr radius"},
-  {k:"α", v:7.29735256e-3, n:"Fine struct cst"},{k:"re", v:2.8179403e-15, n:"Classical e rad"},
-  {k:"γp", v:2.67522187e8, n:"Proton gyromag"}, {k:"λC", v:2.42631023e-12, n:"Compton wave"},
-  {k:"μ0", v:1.256637e-6, n:"Magnetic cst"}, {k:"ε0", v:8.8541878e-12, n:"Electric cst"},
-  {k:"u", v:1.660539e-27, n:"Atomic mass cst"}, {k:"g", v:9.80665, n:"Standard gravity"},
-  {k:"atm", v:101325, n:"Std atmosphere"}
-];
+<script type="module" src="/src/main.js"></script>
 
-const CONVERSIONS = [
-  ["in > cm", x=>x*2.54], ["cm > in", x=>x/2.54], ["ft > m", x=>x*0.3048], ["m > ft", x=>x/0.3048],
-  ["yd > m", x=>x*0.9144], ["m > yd", x=>x/0.9144], ["mile > km", x=>x*1.60934], ["km > mile", x=>x/1.60934],
-  ["acre > m²", x=>x*4046.86], ["m² > acre", x=>x/4046.86], ["gal(US) > L", x=>x*3.78541], ["L > gal(US)", x=>x/3.78541],
-  ["oz > g", x=>x*28.3495], ["g > oz", x=>x/28.3495], ["lb > kg", x=>x*0.453592], ["kg > lb", x=>x/0.453592],
-  ["°F > °C", x=>(x-32)*5/9], ["°C > °F", x=>x*9/5+32], ["atm > Pa", x=>x*101325], ["Pa > atm", x=>x/101325],
-  ["mmHg > Pa", x=>x*133.322], ["Pa > mmHg", x=>x/133.322], ["hp > kW", x=>x*0.7457], ["kW > hp", x=>x/0.7457],
-  ["km/h > m/s", x=>x/3.6], ["m/s > km/h", x=>x*3.6], ["kgf > N", x=>x*9.80665], ["N > kgf", x=>x/9.80665]
-];
-
-// ---------- State Manager ----------
-const S = {
-  mode: 1, // 1:COMP, 2:CMPLX, 3:STAT, 4:BASEN, 5:EQN, 6:MAT, 7:VCT, 8:TABLE
-  angle: 'D', // D, R, G
-  disp: 'NORM', fix: -1, sci: -1,
-  shift: false, alpha: false, aLock: false,
-  tokens: [], cursor: 0,
-  history: [], hPos: 0,
-  mem: {A:0,B:0,C:0,D:0,E:0,F:0,X:0,Y:0,M:0},
-  ans: 0, preAns: 0,
-  isSto: false, isRcl: false, isIns: false,
-  error: null,
-  base: 'DEC', // DEC, HEX, BIN, OCT
-  ms: {
-    t: { st:0, fxText:'', fxToks:[], start:1, end:5, step:1, res:null }, // TABLE
-    e: { t:1, st:0, v:[0,0,0,0,0,0], res:null }, // EQN
-    s: { type:1, stR:0, stC:0, data:[{x:0,y:0,f:1}], edit:true }, // STAT
-    m: { st:'A', d:[2,2], A:[[0,0],[0,0]], B:[[0,0],[0,0]], edit:true, res:null } // MAT
-  }
-};
-
-// UI updating
-const $ = id => document.getElementById(id);
-const vibrate = ms => navigator.vibrate && navigator.vibrate(ms);
-const updateUI = () => {
-  $('st-s').className = S.shift ? 'st-active' : '';
-  $('st-a').className = (S.alpha||S.aLock) ? 'st-active' : '';
-  $('st-m').className = Math.abs(S.mem.M)>1e-15 ? 'st-active' : '';
-  $('st-sto').className = S.isSto ? 'st-active' : '';
-  $('st-rcl').className = S.isRcl ? 'st-active' : '';
-  $('st-deg').className = S.angle==='D' ? 'st-active' : '';
-  $('st-rad').className = S.angle==='R' ? 'st-active' : '';
-  $('st-gra').className = S.angle==='G' ? 'st-active' : '';
-  
-  // Mode indicators
-  ['comp','cplx','stat','base','eqn','mat','vct','table'].forEach(m => {
-    $( `st-${m}`).classList.remove('st-active');
-  });
-  
-  const modes = ['comp','cplx','stat','base','eqn','mat','vct','table'];
-  $( `st-${modes[S.mode-1]}` ).classList.add('st-active');
-  
-  if (S.mode === 4) {
-    $('base-tabs').classList.add('active');
-    ['dec','hex','oct','bin'].forEach(b => $(`tab-${b}`).className = 'base-tab');
-    $(`tab-${S.base.toLowerCase()}`).classList.add('active', 'st-active');
-  } else {
-    $('base-tabs').classList.remove('active');
-  }
-  
-  if(S.error) {
-    $('result-zone').innerHTML = `<span class="st-err">${S.error}</span>`;
-    $('display-glass').classList.add('err-shake');
-    setTimeout(()=>$('display-glass').classList.remove('err-shake'),300);
-    vibrate(50);
-  } else {
-    renderTokens();
-  }
-  renderModeEditor();
-};
-
-const cycleAngle = () => { S.angle = S.angle==='D'?'R':S.angle==='R'?'G':'D'; updateUI(); };
-const setBase = (b) => { S.base = b; updateUI(); };
-
-const renderTokens = () => {
-  let mapped = [];
-  for(let i=0; i<=S.tokens.length; i++) {
-    if(i===S.cursor) mapped.push("_CURSOR_");
-    if(i<S.tokens.length) {
-      let t = S.tokens[i];
-      if(t==='x²') mapped.push('^','2');
-      else if(t==='x³') mapped.push('^','3');
-      else if(t==='x⁻¹') mapped.push('^','-1');
-      else mapped.push(t);
-    }
-  }
-
-  let joined = mapped.join('');
-
-  joined = joined.replace(/([0-9.A-Z_]+)ab\/c([0-9.A-Z_]+)/g, `<span class="fraction"><span class="numerator">$1</span><span class="denominator">$2</span></span>`);
-  joined = joined.replace(/sqrt\(([^)]*)\)?/g, `<span class="radical"><span class="radicand">$1</span></span>`);
-  joined = joined.replace(/∛\(([^)]*)\)?/g, `<span class="radical"><sup class="root-idx">3</sup><span class="radicand">$1</span></span>`);
-  joined = joined.replace(/\^([0-9.A-Z_]+|\([^<)]+\))?(?![^<]*>)/g, "<sup>$1</sup>");
-
-  joined = joined.replace(/(×|÷|\+|−)(?![^<]*>)/g, (m) => {
-     if(m==='×') return '<span class="m-op">&times;</span>';
-     if(m==='÷') return '<span class="m-op">&divide;</span>';
-     if(m==='+') return '<span class="m-op">+</span>';
-     if(m==='−') return '<span class="m-op">&minus;</span>';
-  });
-
-  joined = joined.replace(/\b(pi|e)\b(?![^<]*>)/g, (m) => m==='pi' ? '<span class="m-var">&pi;</span>' : '<span class="m-var">e</span>');
-
-  const funcs = ['sin⁻¹\\(','cos⁻¹\\(','tan⁻¹\\(','sin\\(','cos\\(','tan\\(','log\\(','ln\\(','Abs\\(','GCD\\(','LCM\\(','ceil\\(','floor\\(','int\\(','frac\\(','mod','cbrt\\('];
-  joined = joined.replace(new RegExp(`(${funcs.join('|')})(?![^<]*>)`, 'g'), '<span class="m-fn">$1</span>');
-
-  joined = joined.replace(/\b([A-FXYM])\b(?![^<]*>)/g, '<span class="m-var">$1</span>');
-
-  let html = joined.replace('_CURSOR_', `<span class="cursor"></span>`);
-  $('expression-zone').innerHTML = html || (S.error ? "" : "0");
-  
-  if(S.mode === 4) {
-    let val = 0;
-    try { if(S.tokens.length) val = evaluateTokens(S.tokens); else val = S.ans; } catch(e) {}
-    let nm = typeof val === 'object' ? val.r : val;
-    let u32 = Math.trunc(nm);
-    if(u32 < 0) u32 = u32 >>> 0;
-    
-    let binStr = u32.toString(2).padStart(32, '0').match(/.{1,4}/g).join(' ');
-    let bHtml = `<div style="font-size: clamp(10px, 3.2vw, 14px); text-align: left; display:flex; flex-direction:column; gap:max(1px, 0.5vh); line-height: 1.2; position:absolute; bottom: clamp(4px, 1vh, 8px); left: 8px;">
-      <div style="color: ${S.base==='HEX'?'#FFB300':'#A8C8A0'}"><span style="color:#555; width:30px; display:inline-block">HEX</span> ${u32.toString(16).toUpperCase()}</div>
-      <div style="color: ${S.base==='DEC'?'#FFB300':'#A8C8A0'}"><span style="color:#555; width:30px; display:inline-block">DEC</span> ${u32.toString(10)}</div>
-      <div style="color: ${S.base==='OCT'?'#FFB300':'#A8C8A0'}"><span style="color:#555; width:30px; display:inline-block">OCT</span> ${u32.toString(8)}</div>
-      <div style="color: ${S.base==='BIN'?'#FFB300':'#A8C8A0'}"><span style="color:#555; width:30px; display:inline-block">BIN</span> ${binStr}</div>
-    </div>`;
-    $('result-zone').innerHTML = bHtml;
-  }
-  
-  // Scroll to cursor smoothly
-  const ez = $('expression-zone');
-  const cursorElem = ez.querySelector('.cursor');
-  if(cursorElem) {
-    const rL = ez.getBoundingClientRect().left;
-    const cL = cursorElem.getBoundingClientRect().left;
-    if(cL > rL + ez.clientWidth - 20) ez.scrollLeft += 50;
-    if(cL < rL + 20) ez.scrollLeft -= 50;
-  }
-};
-
-const renderModeEditor = () => {
-  let overlay = $('mode-editor-overlay');
-  if(![3,5,6,8].includes(S.mode)) { overlay.style.display = 'none'; return; }
-  overlay.style.display = 'block';
-  let html = '';
-  let input = S.tokens.join('') || '0';
-  
-  if(S.mode === 8) { // TABLE
-    let st = S.ms.t.st;
-    if(st === 4) {
-      html = `<table class="me-table"><tr><th>x</th><th>f(x)</th></tr>`;
-      S.ms.t.res.forEach(r => html += `<tr><td>${r.x}</td><td>${r.y}</td></tr>`);
-      html += `</table>`;
-    } else {
-      let fv = st===0 ? (S.tokens.length?S.tokens.join(''):S.ms.t.fxText) : S.ms.t.fxText;
-      html += `<div class="me-input-line">f(x) = <div class="me-input-val ${st===0?'active-cell':''}">${fv}</div></div>`;
-      let sv = st===1 ? input : S.ms.t.start;
-      html += `<div class="me-input-line">Start: <div class="me-input-val ${st===1?'active-cell':''}">${sv}</div></div>`;
-      let ev = st===2 ? input : S.ms.t.end;
-      html += `<div class="me-input-line">End: <div class="me-input-val ${st===2?'active-cell':''}">${ev}</div></div>`;
-      let pv = st===3 ? input : S.ms.t.step;
-      html += `<div class="me-input-line">Step: <div class="me-input-val ${st===3?'active-cell':''}">${pv}</div></div>`;
-    }
-  } else if(S.mode === 5) { // EQN
-    let e = S.ms.e;
-    if(e.res) {
-       html += `<div>Roots:</div>`;
-       e.res.forEach((r,i) => html += `<div style="text-align:right; margin-top:4px;">X${i+1} = ${r}</div>`);
-    } else {
-       if(e.t === 1) { // 2x2
-          html = `<table class="me-table"><tr><th>X</th><th>Y</th><th>C</th></tr>`;
-          for(let r=0; r<2; r++) {
-             html += `<tr>`;
-             for(let c=0; c<3; c++) {
-               let idx = r*3 + c;
-               let active = e.st===idx;
-               let val = active ? input : e.v[idx];
-               html += `<td class="${active?'active-cell':''}">${val}</td>`;
-             }
-             html += `</tr>`;
-          }
-          html += `</table>`;
-       } else { // quad
-          html = `<table class="me-table" style="margin-bottom:8px"><tr><th>a</th><th>b</th><th>c</th></tr><tr>`;
-          for(let c=0; c<3; c++) {
-             let active = e.st===c;
-             html += `<td class="${active?'active-cell':''}">${active ? input : e.v[c]}</td>`;
-          }
-          html += `</tr></table><div style="text-align:center">ax² + bx + c = 0</div>`;
-       }
-    }
-  } else if(S.mode === 3) { // STAT
-    let s = S.ms.s;
-    if(!s.edit) { overlay.style.display = 'none'; return; }
-    html = `<table class="me-table"><tr><th>No</th><th>X</th>${s.type===2?'<th>Y</th>':''}<th>FREQ</th></tr>`;
-    for(let r=0; r<s.data.length+1; r++) {
-       let dLine = s.data[r] || {x:'',y:'',f:''};
-       let cX = s.stR===r && s.stC===0;
-       let cY = s.type===2 && s.stR===r && s.stC===1;
-       let fCol = s.type===2 ? 2 : 1;
-       let cF = s.stR===r && s.stC===fCol;
-       if(r===s.data.length && !cX && !cY && !cF) continue; // visually hide last empty row unless focused
-       html += `<tr><td>${r+1}</td>
-       <td class="${cX?'active-cell':''}">${cX ? input : dLine.x}</td>
-       ${s.type===2 ? `<td class="${cY?'active-cell':''}">${cY ? input : dLine.y}</td>` : ''}
-       <td class="${cF?'active-cell':''}">${cF ? input : dLine.f}</td></tr>`;
-    }
-    html += `</table><div style="margin-top:8px;text-align:center">[=] Next | [AC] Hide</div>`;
-  } else if(S.mode === 6) { // MAT
-    let m = S.ms.m;
-    if(!m.edit && !m.res) { overlay.style.display = 'none'; return; }
-    if(m.res) {
-       html += `<div style="margin-bottom:4px">Result Matrix:</div><table class="me-table">`;
-       m.res.forEach(row => {
-          html += `<tr>`;
-          row.forEach(cell => html += `<td>${typeof cell==='number'?cell.toFixed(3).replace(/\.?0+$/,''):cell}</td>`);
-          html += `</tr>`;
-       });
-       html += `</table>`;
-    } else {
-       html += `<div style="margin-bottom:4px">Edit Matrix ${m.st}:</div><table class="me-table">`;
-       let mat = m.st==='A' ? m.A : m.B;
-       for(let r=0; r<mat.length; r++) {
-          html += `<tr>`;
-          for(let c=0; c<mat[r].length; c++) {
-             let active = m.stR===r && m.stC===c;
-             html += `<td class="${active?'active-cell':''}">${active ? input : mat[r][c]}</td>`;
-          }
-          html += `</tr>`;
-       }
-       html += `</table>`;
-    }
-  }
-  
-  $('me-content').innerHTML = html;
-};
-
-const setResult = (val, asFrac=false) => {
-  S.error = null;
-  const rz = $('result-zone');
-  rz.classList.remove('has-result');
-  void rz.offsetWidth; // trigger reflow
-  rz.classList.add('has-result');
-  
-  if (typeof val === 'number') {
-    S.ans = val;
-    S.preAns = S.ans;
-    if(asFrac) {
-      let f = toFraction(val);
-      if(f.includes('/')) {
-        let [n,d] = f.split('/');
-        $('result-zone').innerHTML = `<div class="frac"><span>${n}</span><span>${d}</span></div>`;
-        return;
-      }
-    }
-    let str = val.toPrecision(10).replace(/0+$/,'').replace(/\.$/,'');
-    if(Math.abs(val) < 1e-10 && val !== 0) str = val.toExponential(5);
-    $('result-zone').innerText = str;
-  } else if (typeof val === 'string') {
-    $('result-zone').innerText = val;
-  } else if (val && val.r !== undefined) {
-    S.ans = val;
-    let r = Math.abs(val.r)<1e-10 ? 0 : val.r;
-    let i = Math.abs(val.i)<1e-10 ? 0 : val.i;
-    let rStr = r.toPrecision(8).replace(/0+$/,'').replace(/\.$/,'');
-    let iStr = Math.abs(i)===1 ? (i>0?"i":"-i") : i.toPrecision(8).replace(/0+$/,'').replace(/\.$/,'') + "i";
-    if(r===0 && i===0) $('result-zone').innerText = "0";
-    else if(r===0) $('result-zone').innerText = iStr;
-    else if(i===0) $('result-zone').innerText = rStr;
-    else $('result-zone').innerText = `${rStr} ${i>0?'+':'-'} ${iStr.replace('-','')}`;
-  }
-};
-
-const toFraction = (dec) => {
-  if(!isFinite(dec)) return String(dec);
-  let sign = Math.sign(dec); dec = Math.abs(dec);
-  if(dec - Math.round(dec) < 1e-10) return String(sign*Math.round(dec));
-  for(let d=2; d<=1000; d++) {
-    let n = Math.round(dec*d);
-    if(Math.abs(dec - n/d) < 1e-9) return `${sign*n}/${d}`;
-  }
-  return String(sign*dec);
-};
-
-const factorial = n => {
-  if(n<0 || n%1!==0) throw "Math ERROR";
-  if(n===0) return 1;
-  let res=1; for(let i=1;i<=n;i++) res*=i; return res;
-};
-
-const prec = { '+':1, '−':1, '×':2, '÷':2, 'mod':2, '^':3, 'P':2, 'C':2, 'ab/c':3, 'AND':1, 'OR':1, 'XOR':1, 'XNOR':1, 'SHL':2, 'SHR':2 };
-const opArray = ['+','−','×','÷','^','P','C','mod','ab/c','AND','OR','XOR','XNOR','SHL','SHR'];
-const isOp = t => opArray.includes(t);
-
-function evaluateTokens(toks) {
-  if(!toks.length) return 0;
-  let parsed = [];
-  for(let i=0; i<toks.length; i++) {
-    let t = toks[i], prev = i>0 ? toks[i-1] : null;
-    let isNumLike = prev && (!isOp(prev) && prev!=='(' && prev!==',');
-    let needsMult = (t==='(' || RegExp(/^[a-z]/i).test(t)) && t!=='pi' && isNumLike;
-    if(needsMult) parsed.push('×');
-    if(t==='×10ˣ') { parsed.push('×'); parsed.push('10'); parsed.push('^'); }
-    else parsed.push(t);
-  }
-  
-  let out = [], stack = [];
-  parsed.forEach(t => {
-    if(!isNaN(t) || ['A','B','C','D','E','F','X','Y','M','Ans','PreAns','pi','i'].includes(t)) {
-      out.push(t);
-    } else if(t.match(/^[a-zA-Z]/) && t!=='P' && t!=='C') {
-      stack.push(t);
-    } else if(t === 'x²') {
-      out.push('2'); out.push('^');
-    } else if(t === 'x³') {
-      out.push('3'); out.push('^');
-    } else if(t === 'x⁻¹') {
-      out.push('-1'); out.push('^');
-    } else if(t === 'x!') {
-      out.push('!');
-    } else if(isOp(t)) {
-      while(stack.length && isOp(stack[stack.length-1]) && prec[t] <= prec[stack[stack.length-1]]) {
-        out.push(stack.pop());
-      }
-      stack.push(t);
-    } else if(t === '(') {
-      stack.push(t);
-    } else if(t === ')') {
-      while(stack.length && stack[stack.length-1] !== '(') out.push(stack.pop());
-      stack.pop();
-      if(stack.length && stack[stack.length-1].match(/^[a-zA-Z]/)) out.push(stack.pop());
-    } else if(t === ',') {
-      while(stack.length && stack[stack.length-1] !== '(') out.push(stack.pop());
-    }
-  });
-  while(stack.length) out.push(stack.pop());
-
-  let evalStack = [];
-  const getVal = (x) => {
-    if(typeof x==='number' || typeof x==='object') return x;
-    if(x==='pi') return Math.PI;
-    if(x==='i') return {r:0, i:1};
-    if(S.mem[x]!==undefined) return S.mem[x];
-    if(x==='Ans') return S.ans;
-    if(x==='PreAns') return S.preAns;
-    if(S.mode === 4) {
-      if(S.base === 'HEX') return parseInt(x, 16);
-      if(S.base === 'OCT') return parseInt(x, 8);
-      if(S.base === 'BIN') return parseInt(x, 2);
-      return parseInt(x, 10);
-    }
-    return parseFloat(x);
-  };
-  
-  const toR = a => (S.angle==='D'?a*Math.PI/180 : S.angle==='G'?a*Math.PI/200 : a);
-  const frR = a => (S.angle==='D'?a*180/Math.PI : S.angle==='G'?a*200/Math.PI : a);
-  
-  const isC = v => typeof v==='object';
-  const cR = v => isC(v)?v.r:v; const cI = v => isC(v)?v.i:0;
-  const mkC = (r,i) => (Math.abs(i)<1e-14 && S.mode!==2) ? r : {r,i};
-  const C = {
-    add: (a,b) => mkC(cR(a)+cR(b), cI(a)+cI(b)),
-    sub: (a,b) => mkC(cR(a)-cR(b), cI(a)-cI(b)),
-    mul: (a,b) => mkC(cR(a)*cR(b)-cI(a)*cI(b), cR(a)*cI(b)+cI(a)*cR(b)),
-    div: (a,b) => { let d = cR(b)*cR(b)+cI(b)*cI(b); if(d===0) throw "Math ERROR"; return mkC((cR(a)*cR(b)+cI(a)*cI(b))/d, (cI(a)*cR(b)-cR(a)*cI(b))/d); },
-    pow: (a,b) => {
-      if(!isC(a) && !isC(b)) {
-        if(a<0 && b%1!==0) throw "Non-Real ERROR";
-        return Math.pow(a,b);
-      }
-      throw "Math ERROR";
-    }
-  };
-
-  out.forEach(t => {
-    if(isOp(t)) {
-      if(evalStack.length<2) {
-        if((t==='−'||t==='(-)') && evalStack.length===1) {
-          let a = evalStack.pop(); evalStack.push(C.mul(-1, a)); return;
-        }
-        throw "Syntax ERROR";
-      }
-      let b=getVal(evalStack.pop()), a=getVal(evalStack.pop());
-      if(t==='+') evalStack.push(C.add(a,b));
-      if(t==='−' || t==='(-)') evalStack.push(C.sub(a,b));
-      if(t==='×') evalStack.push(C.mul(a,b));
-      if(t==='÷' || t==='ab/c') evalStack.push(C.div(a,b));
-      if(t==='mod') evalStack.push(C.sub(a, C.mul(Math.floor(cR(a)/cR(b)), b)));
-      if(t==='^') evalStack.push(C.pow(a,b));
-      if(t==='AND') evalStack.push(cR(a) & cR(b));
-      if(t==='OR') evalStack.push(cR(a) | cR(b));
-      if(t==='XOR') evalStack.push(cR(a) ^ cR(b));
-      if(t==='XNOR') evalStack.push(~(cR(a) ^ cR(b)));
-      if(t==='SHL') evalStack.push(cR(a) << cR(b));
-      if(t==='SHR') evalStack.push(cR(a) >>> cR(b));
-      if(t==='P' || t==='C') {
-        if(isC(a)||isC(b)||a<0||b<0||a%1!==0||b%1!==0) throw "Math ERROR";
-        if(t==='P') evalStack.push(factorial(a)/factorial(a-b));
-        if(t==='C') evalStack.push(factorial(a)/(factorial(b)*factorial(a-b)));
-      }
-    } else if(t==='!') {
-      let a=getVal(evalStack.pop()); evalStack.push(factorial(a));
-    } else if(t.match(/^[a-zA-Z]/)) {
-      let a = getVal(evalStack.pop());
-      if(isC(a) && S.mode!==2) throw "Non-Real ERROR";
-      let v = cR(a);
-      if(t==='NOT(') evalStack.push(~v);
-      else if(t==='NEG(') evalStack.push(-v);
-      else if(t==='GCD(' || t==='LCM(') {
-        let arg1 = getVal(evalStack.pop());
-        let u = cR(arg1);
-        if(u%1!==0 || v%1!==0) throw "Math ERROR";
-        if(t==='GCD(') {
-           let gcd = (x,y) => y==0?x:gcd(y,x%y);
-           evalStack.push(Math.abs(gcd(u,v)));
-        } else {
-           let gcd = (x,y) => y==0?x:gcd(y,x%y);
-           evalStack.push(Math.abs(u*v)/gcd(u,v));
-        }
-      }
-      else if(t==='sin(') evalStack.push(Math.sin(toR(v)));
-      else if(t==='cos(') evalStack.push(Math.cos(toR(v)));
-      else if(t==='tan(') evalStack.push(Math.tan(toR(v)));
-      else if(t==='asin(') evalStack.push(frR(Math.asin(v)));
-      else if(t==='acos(') evalStack.push(frR(Math.acos(v)));
-      else if(t==='atan(') evalStack.push(frR(Math.atan(v)));
-      else if(t==='sinh(') evalStack.push(Math.sinh(v));
-      else if(t==='cosh(') evalStack.push(Math.cosh(v));
-      else if(t==='tanh(') evalStack.push(Math.tanh(v));
-      else if(t==='log(') evalStack.push(Math.log10(v));
-      else if(t==='ln(') evalStack.push(Math.log(v));
-      else if(t==='sqrt(') evalStack.push(v<0 ? Math.sqrt(-v)*{r:0,i:1} : Math.sqrt(v));
-      else if(t==='cbrt(' || t==='∛(') evalStack.push(Math.cbrt(v));
-      else if(t==='abs(' || t==='Abs(') evalStack.push(Math.abs(v));
-      else if(t==='cot(') evalStack.push(1 / Math.tan(toR(v)));
-      else if(t==='ceil(') evalStack.push(Math.ceil(v));
-      else if(t==='floor(') evalStack.push(Math.floor(v));
-      else if(t==='int(') evalStack.push(Math.trunc(v));
-      else if(t==='frac(') evalStack.push(v - Math.trunc(v));
-      else evalStack.push(a);
-    } else {
-      evalStack.push(t);
-    }
-  });
-  
-  if(evalStack.length !== 1) throw "Syntax ERROR";
-  return getVal(evalStack[0]);
-}
-
-const handleKey = (group, val) => {
-  vibrate(10);
-  if(S.error && val!=='AC') {
-    S.error=null; updateUI();
-    return;
-  }
-  
-  if(val==='AC' || val==='ON') {
-    S.tokens=[]; S.cursor=0; S.error=null; setResult(0);
-    S.shift=false; S.alpha=false; S.isSto=false; S.isRcl = false;
-    if(S.mode === 3) { S.ms.s.edit = false; }
-    if(S.mode === 5) { S.ms.e.res = null; S.ms.e.st = 0; S.ms.e.v.fill(0); }
-    if(S.mode === 6) { S.ms.m.edit = false; S.ms.m.res = null; }
-    if(S.mode === 8) { S.ms.t.st = 0; S.ms.t.res = null; }
-    updateUI(); return;
-  }
-
-  if(S.isSto && "ABCDEFXYM".includes(val)) {
-    try { S.mem[val] = evaluateTokens(S.tokens); setResult(S.mem[val]); S.tokens=[]; S.cursor=0; } catch(e) {}
-    S.isSto=false; S.shift=false; updateUI(); return;
-  }
-  if(S.isRcl && "ABCDEFXYM".includes(val)) {
-    S.tokens.splice(S.cursor, 0, val); S.cursor++;
-    S.isRcl=false; S.shift=false; updateUI(); return;
-  }
-  
-  if(val==='DEL') {
-    if(S.cursor>0) {
-      let t = String(S.tokens[S.cursor-1]);
-      if(t.length > 1 && /^[0-9.A-F]+$/.test(t) && !(S.mode !== 4 && /^[A-F]+$/.test(t))) {
-        S.tokens[S.cursor-1] = t.slice(0, -1);
-      } else {
-        S.tokens.splice(S.cursor-1, 1);
-        S.cursor--;
-      }
-    }
-  }
-  else if(val==='◄') { if(S.cursor>0) S.cursor--; }
-  else if(val==='►') { if(S.cursor<S.tokens.length) S.cursor++; }
-  else if(val==='▲') { if(S.history.length>0) { S.hPos=Math.max(0, S.hPos-1); S.tokens=[...S.history[S.hPos]]; S.cursor=S.tokens.length; } }
-  else if(val==='▼') { if(S.hPos<S.history.length-1){S.hPos++; S.tokens=[...S.history[S.hPos]]; S.cursor=S.tokens.length;} }
-  else if(val==='=') {
-    if(S.mode === 8 && S.ms.t.st !== 4) {
-       let t = S.ms.t;
-       if(t.st === 0) { t.fxText = S.tokens.join(''); t.fxToks = [...S.tokens]; S.tokens=[]; S.cursor=0; t.st++; }
-       else {
-         let v = 0; try { v = evaluateTokens(S.tokens); }catch{}
-         if(t.st === 1) t.start = v;
-         if(t.st === 2) t.end = v;
-         if(t.st === 3) {
-            t.step = v; t.res = [];
-            for(let x=t.start; x<=t.end; x+=t.step) {
-               try {
-                  let oldX = S.mem.X; S.mem.X = x;
-                  t.res.push({x: x.toFixed(2), y: evaluateTokens(t.fxToks).toFixed(2)});
-                  S.mem.X = oldX;
-               } catch(e) { t.res.push({x:x.toFixed(2), y:'ERROR'}); }
-            }
-            t.st++;
-         } else { t.st++; }
-         S.tokens=[]; S.cursor=0;
-       }
-       updateUI(); return;
-    }
-    if(S.mode === 5 && !S.ms.e.res) {
-       let e = S.ms.e;
-       let maxSt = e.t===1 ? 5 : 2;
-       let v = 0; try { v = evaluateTokens(S.tokens); }catch{}
-       e.v[e.st] = v; S.tokens=[]; S.cursor=0;
-       if(e.st === maxSt) {
-          // SOLVE
-          if(e.t === 1) {
-             let d = e.v[0]*e.v[4] - e.v[1]*e.v[3];
-             if(d===0) e.res = ["NO SOLUTION"];
-             else e.res = [(e.v[2]*e.v[4] - e.v[1]*e.v[5])/d, (e.v[0]*e.v[5] - e.v[2]*e.v[3])/d];
-          } else {
-             let a=e.v[0], b=e.v[1], c=e.v[2];
-             let d = b*b - 4*a*c;
-             if(d>=0) { e.res = [(-b+Math.sqrt(d))/(2*a), (-b-Math.sqrt(d))/(2*a)]; }
-             else { e.res = [`${-b/(2*a)} + ${Math.sqrt(-d)/(2*a)}i`, `${-b/(2*a)} - ${Math.sqrt(-d)/(2*a)}i`]; }
-          }
-       } else { e.st++; }
-       updateUI(); return;
-    }
-    if(S.mode === 3 && S.ms.s.edit) {
-       let s = S.ms.s;
-       let v = 0; try { v = evaluateTokens(S.tokens); }catch{}
-       if(!s.data[s.stR]) s.data.push({x:0,y:0,f:Math.max(1, v)});
-       let fCol = s.type===2 ? 2 : 1;
-       if(s.stC===0) s.data[s.stR].x = v;
-       else if(s.stC===1 && s.type===2) s.data[s.stR].y = v;
-       else s.data[s.stR].f = v;
-       
-       s.stC++; if(s.stC > fCol) { s.stC=0; s.stR++; }
-       if(!s.data[s.stR]) s.data.push({x:0,y:0,f:1});
-       S.tokens=[]; S.cursor=0; updateUI(); return;
-    }
-    if(S.mode === 6 && S.ms.m.edit && !S.ms.m.res) {
-       let m = S.ms.m;
-       let mat = m.st==='A' ? m.A : m.B;
-       let v = 0; try { v = evaluateTokens(S.tokens); }catch{}
-       mat[m.stR][m.stC] = v;
-       m.stC++; if(m.stC >= mat[m.stR].length) { m.stC=0; m.stR++; }
-       if(m.stR >= mat.length) { m.edit=false; m.stR=0; } // finished matrix
-       S.tokens=[]; S.cursor=0; updateUI(); return;
-    }
-
-    if(S.tokens.length) {
-      try {
-        let res = evaluateTokens(S.tokens);
-        S.history.push([...S.tokens]); S.hPos = S.history.length;
-        setResult(res); S.tokens=[]; S.cursor=0;
-      } catch(e) {
-        S.error = typeof e ==='string' ? e : "Math ERROR";
-      }
-    }
-  }
-  else if(val==='S⇔D') {
-    if(!S.error) setResult(S.ans, true);
-  }
-  else if(val==='M+') {
-    if(S.tokens.length) {
-       try { S.mem.M += evaluateTokens(S.tokens); setResult(S.mem.M); S.tokens=[]; S.cursor=0; } catch(e){}
-    } else { S.mem.M += S.ans; setResult(S.mem.M); }
-  }
-  else if(val==='M−') {
-    if(S.tokens.length) {
-       try { S.mem.M -= evaluateTokens(S.tokens); setResult(S.mem.M); S.tokens=[]; S.cursor=0; } catch(e){}
-    } else { S.mem.M -= S.ans; setResult(S.mem.M); }
-  }
-  else if(val==='MR') { S.tokens.splice(S.cursor, 0, 'M'); S.cursor++; }
-  else if(val==='Ran#') { S.tokens.splice(S.cursor, 0, String(Math.random())); S.cursor++; }
-  else if(val==='nCr') { S.tokens.splice(S.cursor, 0, 'C'); S.cursor++; }
-  else if(val==='nPr') { S.tokens.splice(S.cursor, 0, 'P'); S.cursor++; }
-  else if(val==='ENG') { if(S.tokens.length===0 && S.ans) setResult(S.ans.toExponential(3)); }
-  else {
-    let prev = S.cursor > 0 ? String(S.tokens[S.cursor - 1]) : '';
-    let isMergeable = (x) => /^[0-9.]+$/.test(x) || (S.mode === 4 && /^[0-9A-F]+$/.test(x));
-    
-    if(prev && isMergeable(prev) && isMergeable(val) && S.cursor === S.tokens.length) {
-      S.tokens[S.cursor - 1] = prev + val;
-    } else {
-      S.tokens.splice(S.cursor, 0, val);
-      S.cursor++;
-    }
-  }
-  
-  S.shift = false;
-  if(!S.aLock) S.alpha = false;
-  updateUI();
-};
-
-const pressBtn = (btn) => {
-  let p = btn.getAttribute('data-p'),
-      s = btn.getAttribute('data-s'),
-      a = btn.getAttribute('data-a'),
-      cat = btn.getAttribute('data-cat');
-      
-  if(S.shift && s) {
-    if(s==='SETUP') showMenu('SETUP', ['1:Angle (Deg,Rad,Gra)', '2:Display (Norm,Sci)', '3:Reset All']);
-    else if(s==='CONST') showMenu('CONST', CONSTANTS.map((c,i)=>`${i+1}:${c.k} - ${c.n}`));
-    else if(s==='CONV') showMenu('CONV', CONVERSIONS.map((c,i)=>`${i+1}:${c[0]}`));
-    else if(s==='STAT') showMenu('STAT', ['1:1-VAR', '2:2-VAR', '3:Results']);
-    else if(s==='MAT') showMenu('MAT', ['1:Dim A', '2:Dim B', '3:Edit A', '4:Edit B', '5:MatA', '6:MatB', '7:A+B', '8:A×B', '9:det(A)']);
-    else if(s==='STO') { S.isSto = true; S.shift=true; updateUI(); return; }
-    else if(s==='CLR') { S.mem={A:0,B:0,C:0,D:0,E:0,F:0,X:0,Y:0,M:0}; alert("Memory Cleared"); handleKey('SYS','AC'); }
-    else handleKey(cat, s);
-  } else if(S.alpha && a) {
-    handleKey('ALPHA', a);
-  } else {
-    if(p==='SHIFT') { S.shift = !S.shift; updateUI(); return; }
-    if(p==='ALPHA') { S.alpha = !S.alpha; updateUI(); return; }
-    if(p==='MODE') { showMenu('MODE', ['1:COMP', '2:CMPLX', '3:STAT', '4:BASE-N', '5:EQN', '6:MAT', '7:VCT', '8:TABLE']); return; }
-    if(p==='RCL') { S.isRcl = !S.isRcl; updateUI(); return; }
-    handleKey(cat, p);
-  }
-};
-
-const KEYS = [
-  ['SHIFT','SETUP','','btn-sys','SYS'], ['ALPHA','A-LOCK','','btn-sys','SYS'], ['◄','','','btn-sys','NAV'], ['►','','','btn-sys','NAV'], ['MODE','','','btn-sys','SYS'],
-  ['▲','','','btn-sys','NAV'], ['▼','','','btn-sys','NAV'], ['∫dx','d/dx',':','btn-sys','MATH'], ['CALC','=','','btn-sys','SYS'], ['ON','OFF','','btn-ac','SYS'],
-  
-  ['x³','∛','','btn-op','MATH'], ['Abs(','','','btn-op','MATH'], ['mod','','','btn-op','MATH'], ['cot(','','','btn-op','MATH'], ['∞','','','btn-op','MATH'],
-  ['GCD(','','','btn-op','MATH'], ['LCM(','','','btn-op','MATH'], ['ceil(','int(','','btn-op','MATH'], ['floor(','frac(','','btn-op','MATH'], ['Σ','Π','','btn-op','MATH'],
-
-  ['x⁻¹','','','btn-op','MATH'], ['√','','','btn-op','MATH'], ['x²','','','btn-op','MATH'], ['^','ˣ√','','btn-op','MATH'], ['log(','10ˣ','','btn-op','MATH'],
-  ['ln(','eˣ','','btn-op','MATH'], ['(-)','A','A','btn-op','MATH'], ['°\'"','B','B','btn-op','MATH'], ['hyp','C','C','btn-op','MATH'], ['sin(','sin⁻¹','D','btn-op','MATH'],
-  ['cos(','cos⁻¹','E','btn-op','MATH'], ['tan(','tan⁻¹','F','btn-op','MATH'], ['STO','','X','btn-op','SYS'], ['RCL','MR','Y','btn-op','SYS'], ['S⇔D','','M','btn-op','SYS'],
-  ['nCr','Pol(','','btn-op','MATH'], ['nPr','Rec(','','btn-op','MATH'], ['x!','','','btn-op','MATH'], ['Ran#','RanInt#','','btn-op','MATH'], ['ENG','','','btn-op','MATH'],
-  ['(','','%','btn-op','MATH'], [')',',','X','btn-op','MATH'], ['ab/c','d/c','Y','btn-op','MATH'], ['M+','','','btn-op','SYS'], ['M−','','','btn-op','SYS'],
-  
-  ['7','CONST','','btn-num','NUM'], ['8','CONV','','btn-num','NUM'], ['9','CLR','','btn-num','NUM'], ['DEL','INS','','btn-ac','SYS'], ['AC','','','btn-ac','SYS'],
-  ['4','MAT','','btn-num','NUM'], ['5','VCT','','btn-num','NUM'], ['6','','','btn-num','NUM'], ['×','','','btn-op','MATH'], ['÷','','','btn-op','MATH'],
-  ['1','STAT','','btn-num','NUM'], ['2','CMPLX','','btn-num','NUM'], ['3','BASE','','btn-num','NUM'], ['+','','','btn-op','MATH'], ['−','','','btn-op','MATH'],
-  ['0','','','btn-num','NUM'], ['.','','','btn-num','NUM'], ['×10ˣ','pi','e','btn-num','NUM'], ['Ans','PreAns','i','btn-num','NUM'], ['=','','','btn-sys','SYS']
-];
-
-const renderKeypad = () => {
-  let html = "";
-  KEYS.forEach(k => {
-    let [p, s, a, cls, cat] = k;
-    let labelS = s, labelA = a, keyP = p, dP = p;
-    let isDisabled = false;
-    
-    if (S.mode === 4) {
-       if(p === '(-)') { keyP = 'A'; dP = 'A'; cls = 'btn-num'; }
-       if(p === '°\'"') { keyP = 'B'; dP = 'B'; cls = 'btn-num'; }
-       if(p === 'hyp') { keyP = 'C'; dP = 'C'; cls = 'btn-num'; }
-       if(p === 'sin(') { keyP = 'D'; dP = 'D'; cls = 'btn-num'; }
-       if(p === 'cos(') { keyP = 'E'; dP = 'E'; cls = 'btn-num'; }
-       if(p === 'tan(') { keyP = 'F'; dP = 'F'; cls = 'btn-num'; }
-       
-       if(p === 'x⁻¹') dP = keyP = 'AND';
-       if(p === '√') dP = keyP = 'OR';
-       if(p === 'x²') dP = keyP = 'XOR';
-       if(p === '^') dP = keyP = 'XNOR';
-       if(p === 'log(') dP = keyP = 'NOT(';
-       if(p === 'ln(') dP = keyP = 'NEG(';
-       if(p === 'x³') dP = keyP = 'SHL';
-       if(p === '∛') dP = keyP = 'SHR';
-       
-       if(S.base === 'DEC' && 'ABCDEF'.includes(keyP)) isDisabled = true;
-       if(S.base === 'OCT' && '89ABCDEF'.includes(keyP)) isDisabled = true;
-       if(S.base === 'BIN' && '23456789ABCDEF'.includes(keyP)) isDisabled = true;
-       
-       if('ABCDEF'.includes(keyP) && !isDisabled) {
-          cls += ' key-hex';
-       }
-       if(['sin⁻¹','cos⁻¹','tan⁻¹','A','B','C','D','E','F'].includes(s) || ['A','B','C','D','E','F'].includes(a)) {
-          labelS = ''; labelA = '';
-       }
-    }
-
-    html += `
-      <div class="key-wrapper">
-        <div class="key-labels"><span class="lbl-s">${labelS}</span><span class="lbl-a">${labelA}</span></div>
-        <button class="btn ${cls}" data-p="${keyP}" data-s="${s}" data-a="${a}" data-cat="${cat}" onclick="pressBtn(this)" style="opacity: ${isDisabled ? '0.2' : '1'}; pointer-events: ${isDisabled ? 'none' : 'auto'}">${dP.replace('^','x^').replace('sqrt','√')}</button>
-      </div>`;
-  });
-  $('keypad').innerHTML = html;
-};
-
-const showMenu = (title, items) => {
-  $('modal-title').innerText = title;
-  let html = items.map((t,i) => `<div class="menu-item" onclick="selectMenu('${title}',${i},'${t.replace(/'/g,"")}')"><span class="menu-key">[${i+1}]</span> ${t.split(':')[1]||t}</div>`).join('');
-  $('modal-list').innerHTML = html;
-  $('sys-modal').classList.add('active');
-};
-
-const showModalHtml = (title, html) => {
-  $('modal-title').innerText = title;
-  $('modal-list').innerHTML = `<div style="padding: 10px; line-height:1.5;">${html}</div>`;
-  $('sys-modal').classList.add('active');
-};
-
-const selectMenu = (type, idx, text) => {
-  $('sys-modal').classList.remove('active');
-  if(type==='MODE') {
-    S.mode = idx+1; handleKey('SYS','AC'); 
-    S.error = "MODE: " + text.split(':')[1];
-    if(S.mode===5) setTimeout(() => showMenu('EQN', ['1:anX+bnY=cn', '2:ax²+bx+c=0']), 100);
-    updateUI();
-  }
-  else if(type==='EQN') {
-    S.ms.e.t = idx+1; S.ms.e.st=0; S.ms.e.res=null; S.ms.e.v.fill(0);
-    updateUI();
-  }
-  else if(type==='STAT') {
-    if(S.mode !== 3) { S.error="Mode ERROR"; return updateUI(); }
-    let s = S.ms.s;
-    if(idx===0) { s.type=1; s.data=[{x:0,y:0,f:1}]; s.stR=0; s.stC=0; s.edit=true; }
-    else if(idx===1) { s.type=2; s.data=[{x:0,y:0,f:1}]; s.stR=0; s.stC=0; s.edit=true; }
-    else if(idx===2) {
-       s.edit = false;
-       let n=0, sX=0, sX2=0, sY=0, sY2=0, sXY=0, mxX=null, mnX=null;
-       s.data.forEach(d => { 
-         if(d.x===0 && d.y===0 && d.f===1) return; // skip default empty
-         n+=d.f; sX+=d.x*d.f; sX2+=d.x*d.x*d.f; 
-         if(s.type===2) { sY+=d.y*d.f; sY2+=d.y*d.y*d.f; sXY+=d.x*d.y*d.f; }
-         if(mxX===null || d.x>mxX) mxX=d.x;
-         if(mnX===null || d.x<mnX) mnX=d.x;
-       });
-       let xB = n?sX/n:0, yB = n?sY/n:0;
-       let sx = n?Math.sqrt((sX2-n*xB*xB)/n):0;
-       let h = `n=\t${n}<br>Σx=\t${sX}<br>Σx²=\t${sX2}<br>x̄=\t${xB.toFixed(4)}<br>σx=\t${sx.toFixed(4)}<br>minX=\t${mnX}<br>maxX=\t${mxX}`;
-       if(s.type===2) {
-          let Sxx = sX2 - (sX*sX)/n, Syy = sY2 - (sY*sY)/n, Sxy = sXY - (sX*sY)/n;
-          let B = Sxx?Sxy/Sxx:0, A = yB - B*xB;
-          let r = (Sxx&&Syy)?Sxy/Math.sqrt(Sxx*Syy):0;
-          h += `<br><br>Σy=\t${sY}<br>ȳ=\t${yB.toFixed(4)}<br>A=\t${A.toFixed(4)}<br>B=\t${B.toFixed(4)}<br>r=\t${r.toFixed(4)}`;
-       }
-       showModalHtml('STAT Results', h.replace(/\n/g,''));
-    }
-    updateUI();
-  }
-  else if(type==='MAT') {
-    if(S.mode !== 6) { S.error="Mode ERROR"; return updateUI(); }
-    let m = S.ms.m;
-    if(idx===0 || idx===1) {
-       let ans = prompt("Enter dimensions (rows,cols) e.g., 2,2 or 3,3");
-       let dims = ans ? ans.split(',').map(Number) : [2,2];
-       if(dims.length!==2 || dims[0]<1 || dims[0]>3 || dims[1]<1 || dims[1]>3) return alert("Invalid dims");
-       let newM = []; for(let r=0;r<dims[0];r++) { newM.push(new Array(dims[1]).fill(0)); }
-       if(idx===0) m.A=newM; else m.B=newM;
-       m.st = idx===0 ? 'A' : 'B';
-       m.stC=0; m.stR=0; m.edit=true; m.res=null;
-    }
-    else if(idx===2 || idx===3) { m.st = idx===2 ? 'A' : 'B'; m.stC=0; m.stR=0; m.edit=true; m.res=null; }
-    else if(idx===4 || idx===5) { m.res = idx===4 ? m.A : m.B; m.edit=false; }
-    else if(idx===6 || idx===7) { // A+B, AxB
-       let aR = m.A.length, aC = m.A[0].length, bR = m.B.length, bC = m.B[0].length;
-       if(idx===6 && (aR!==bR || aC!==bC)) { S.error="Dim ERROR"; return updateUI(); }
-       if(idx===7 && aC!==bR) { S.error="Dim ERROR"; return updateUI(); }
-       m.res = [];
-       if(idx===6) {
-          for(let r=0;r<aR;r++){ m.res[r]=[]; for(let c=0;c<aC;c++) m.res[r][c] = m.A[r][c]+m.B[r][c]; }
-       } else {
-          for(let r=0;r<aR;r++){ m.res[r]=[]; for(let c=0;c<bC;c++){ let s=0; for(let k=0;k<aC;k++) s+=m.A[r][k]*m.B[k][c]; m.res[r][c]=s; } }
-       }
-       m.edit=false;
-    }
-    else if(idx===8) { // det(A)
-       let aR = m.A.length, aC = m.A[0].length;
-       if(aR!==aC) { S.error="Dim ERROR"; return updateUI(); }
-       let det = 0;
-       if(aR===1) det=m.A[0][0];
-       else if(aR===2) det=m.A[0][0]*m.A[1][1] - m.A[0][1]*m.A[1][0];
-       else if(aR===3) det=m.A[0][0]*(m.A[1][1]*m.A[2][2]-m.A[1][2]*m.A[2][1]) - m.A[0][1]*(m.A[1][0]*m.A[2][2]-m.A[1][2]*m.A[2][0]) + m.A[0][2]*(m.A[1][0]*m.A[2][1]-m.A[1][1]*m.A[2][0]);
-       alert("det(A) = " + det); m.res=null; m.edit=false;
-    }
-    updateUI();
-  }
-  else if(type==='SETUP') {
-    if(idx===0) { S.angle = S.angle==='D'?'R':S.angle==='R'?'G':'D'; }
-    else if(idx===2) { localStorage.clear(); location.reload(); }
-    updateUI();
-  }
-  else if(type==='CONST') { handleKey('NUM', CONSTANTS[idx].v); }
-  else if(type==='CONV') {
-    if(S.tokens.length) {
-      try {
-        let v = evaluateTokens(S.tokens);
-        let res = CONVERSIONS[idx][1](v);
-        S.tokens=[]; S.cursor=0; setResult(res);
-      } catch(e) { }
-    }
-  }
-};
-
-renderKeypad(); 
-updateUI();
-
-try {
-  const swCode = `self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>new Response('Offline'))));`;
-  const swBlob = new Blob([swCode], {type: 'application/javascript'});
-  navigator.serviceWorker && navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
-} catch(e) {}
-</script>
 </body>
 </html>
